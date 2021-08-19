@@ -2,7 +2,7 @@ import { ArticleResponse, Metadata } from "./types";
 import * as faker from "faker";
 
 const article: ArticleResponse = {
-  plain: faker.lorem.sentences(10),
+  plain: faker.lorem.paragraphs(10, " "),
   html: "ELIDED",
   image: {
     main: {

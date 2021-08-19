@@ -116,7 +116,7 @@ const createPDF = async (data: AgreggatedData): Promise<PDFDocument> => {
       font: timesRomanFont,
     });
     // move position down
-    startingPositon = startingPositon - 15;
+    startingPositon = startingPositon - 15; // sentence spacing
   }
 
   return pdfDoc;
