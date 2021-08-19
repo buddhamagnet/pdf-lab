@@ -6,10 +6,10 @@ import {
   rgb,
   RGB,
   ColorTypes,
-} from 'pdf-lib';
-import { AgreggatedData } from './types';
-import { articleBuilder, metadataBuilder } from './builders';
-import fs from 'fs';
+} from "pdf-lib";
+import { AgreggatedData } from "./types";
+import { articleBuilder, metadataBuilder } from "./builders";
+import fs from "fs";
 
 type LayoutOptions = {
   height: number;
@@ -20,7 +20,7 @@ type LayoutOptions = {
   };
 };
 
-const sanitize = (input: string) => input.replace('■', '');
+const sanitize = (input: string) => input.replace("■", "");
 
 const generateLayout = (data: AgreggatedData, options: LayoutOptions) => {
   const { articleSection, title, subheadline, issue } = data;
@@ -31,19 +31,19 @@ const generateLayout = (data: AgreggatedData, options: LayoutOptions) => {
     firstDraw: { x: 50, y: height - 4 * fontSize, color: colours.red },
     textPositions: [
       {
-        name: 'section',
+        name: "section",
         text: articleSection,
         height: 1,
         supplementary: { x: width - 140, size: 10 },
       },
       {
-        name: 'issue',
+        name: "issue",
         text: issue.issueNumber,
         height: 1,
         supplementary: { x: width - 80, size: 10 },
       },
-      { name: 'headline', text: title.print || title.article, height: 5 },
-      { name: 'subheadline', text: subheadline, height: 7 },
+      { name: "headline", text: title.print || title.article, height: 5 },
+      { name: "subheadline", text: subheadline, height: 7 },
       // Here we will need to do some work to deterine wrapping and line breaks
       // see https://github.com/Hopding/pdf-lib/issues/72
     ],
@@ -55,16 +55,16 @@ const createPDF = async (data: AgreggatedData): Promise<PDFDocument> => {
 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.setTitle(title.print || title.article);
-  pdfDoc.setAuthor('The Economist');
+  pdfDoc.setAuthor("The Economist");
 
   // Set up fonts and defaults.
-  const size = 20;
+  const size = 12;
 
   const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
 
   // Add page and get props from it.
   const page = pdfDoc.addPage();
-  const { height, width } = page.getSize();
+  const { height, width } = page.getSize(); //height:841.89mm width 595.28
   const colours = {
     black: rgb(0, 0, 0),
     red: rgb(1.0, 0, 0),
@@ -89,7 +89,7 @@ const createPDF = async (data: AgreggatedData): Promise<PDFDocument> => {
     })
   );
 
-  const text = { name: 'text', text: sanitize(plain), height: 10 };
+  const text = { name: "text", text: sanitize(plain), height: 10 };
 
   const multiText = layoutMultilineText(text.text, {
     alignment: TextAlignment.Left,
@@ -105,10 +105,10 @@ const createPDF = async (data: AgreggatedData): Promise<PDFDocument> => {
       let page = pdfDoc.addPage();
       page.setFont(timesRomanFont);
       // reset starting position
-      startingPositon = height - 100;
+      startingPositon = height - 150; //where text starts on page
     }
     page.drawText(`${multiText.lines[i].text}`, {
-      x: 100,
+      x: 50,
       y: startingPositon,
       size,
       maxWidth: width - 100,
@@ -116,7 +116,7 @@ const createPDF = async (data: AgreggatedData): Promise<PDFDocument> => {
       font: timesRomanFont,
     });
     // move position down
-    startingPositon = startingPositon - 10;
+    startingPositon = startingPositon - 15;
   }
 
   return pdfDoc;
@@ -132,13 +132,13 @@ const pdf = async () => {
   const data = await toPDF({
     ...metadataBuilder({
       title: {
-        article: 'A bright future for the world of work',
-        print: 'Labour gains',
+        article: "A bright future for the world of work",
+        print: "Labour gains",
       },
     }),
     ...articleBuilder(),
   });
-  fs.writeFile('./test.pdf', data, () => {});
+  fs.writeFile("./test.pdf", data, () => {});
 };
 
 pdf();
