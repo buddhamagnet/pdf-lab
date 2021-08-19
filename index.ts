@@ -1,4 +1,12 @@
-import { PDFDocument, StandardFonts, rgb, RGB } from 'pdf-lib';
+import {
+  PDFDocument,
+  StandardFonts,
+  TextAlignment,
+  layoutMultilineText,
+  rgb,
+  RGB,
+  ColorTypes,
+} from 'pdf-lib';
 import { AgreggatedData } from './types';
 import { articleBuilder, metadataBuilder } from './builders';
 import fs from 'fs';
@@ -15,7 +23,7 @@ type LayoutOptions = {
 const sanitize = (input: string) => input.replace('■', '');
 
 const generateLayout = (data: AgreggatedData, options: LayoutOptions) => {
-  const { articleSection, title, subheadline, plain, issue } = data;
+  const { articleSection, title, subheadline, issue } = data;
   const { height, width, font } = options;
   const { size: fontSize, colours } = font;
 
@@ -38,13 +46,12 @@ const generateLayout = (data: AgreggatedData, options: LayoutOptions) => {
       { name: 'subheadline', text: subheadline, height: 7 },
       // Here we will need to do some work to deterine wrapping and line breaks
       // see https://github.com/Hopding/pdf-lib/issues/72
-      { name: 'text', text: sanitize(plain), height: 10 },
     ],
   };
 };
 
 const createPDF = async (data: AgreggatedData): Promise<PDFDocument> => {
-  const { title } = data;
+  const { plain, title } = data;
 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.setTitle(title.print || title.article);
@@ -81,6 +88,36 @@ const createPDF = async (data: AgreggatedData): Promise<PDFDocument> => {
       ...element.supplementary,
     })
   );
+
+  const text = { name: 'text', text: sanitize(plain), height: 10 };
+
+  const multiText = layoutMultilineText(text.text, {
+    alignment: TextAlignment.Left,
+    font: timesRomanFont,
+    fontSize: size,
+    bounds: { width: width - 100, height: 10000, x: width - 100, y: 10000 },
+  });
+
+  let startingPositon = 0;
+
+  for (let i = 0; i < multiText.lines.length; i++) {
+    if (startingPositon < 50) {
+      let page = pdfDoc.addPage();
+      page.setFont(timesRomanFont);
+      // reset starting position
+      startingPositon = height - 100;
+    }
+    page.drawText(`${multiText.lines[i].text}`, {
+      x: 100,
+      y: startingPositon,
+      size,
+      maxWidth: width - 100,
+      color: colours.black,
+      font: timesRomanFont,
+    });
+    // move position down
+    startingPositon = startingPositon - 10;
+  }
 
   return pdfDoc;
 };
