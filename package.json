@@ -1,0 +1,21 @@
+{
+  "name": "pdf-lab",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "gen": "ts-node index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^5.5.3",
+    "zod": "^3.7.2"
+  },
+  "devDependencies": {
+    "@types/faker": "^5.5.8",
+    "@types/node": "^16.6.1",
+    "pdf-lib": "^1.16.0"
+  }
+}
